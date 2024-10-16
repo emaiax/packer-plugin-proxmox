@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
@@ -16,9 +17,21 @@ import (
 )
 
 func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step, vmCreator ProxmoxVMCreator) *Builder {
+	return NewCustomSharedBuilder(
+		id,
+		config,
+		[]multistep.Step{},
+		preSteps,
+		postSteps,
+		vmCreator,
+	)
+}
+
+func NewCustomSharedBuilder(id string, config Config, coreSteps []multistep.Step, preSteps []multistep.Step, postSteps []multistep.Step, vmCreator ProxmoxVMCreator) *Builder {
 	return &Builder{
 		id:        id,
 		config:    config,
+		coreSteps: coreSteps,
 		preSteps:  preSteps,
 		postSteps: postSteps,
 		vmCreator: vmCreator,
@@ -28,6 +41,7 @@ func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postS
 type Builder struct {
 	id            string
 	config        Config
+	coreSteps     []multistep.Step // override entire coreSteps
 	preSteps      []multistep.Step
 	postSteps     []multistep.Step
 	runner        multistep.Runner
@@ -51,7 +65,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 	comm := &b.config.Comm
 
 	// Build the steps
-	coreSteps := []multistep.Step{
+	defaultCoreSteps := []multistep.Step{
 		&stepStartVM{
 			vmCreator: b.vmCreator,
 		},
@@ -72,9 +86,19 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 		&stepRemoveCloudInitDrive{},
 		&stepConvertToTemplate{},
 		&stepFinalizeTemplateConfig{},
-		&stepSuccess{},
+		&StepSuccess{},
 	}
+
+	// If coreSteps is not set, use the default coreSteps
+	var coreSteps []multistep.Step
+	if coreSteps = b.coreSteps; len(coreSteps) == 0 {
+		coreSteps = defaultCoreSteps
+	}
+
 	preSteps := b.preSteps
+	// postSteps := b.postSteps // added directly to steps below
+
+	// If we have a boot ISO, add it to the preSteps
 	for idx := range b.config.ISOs {
 		if b.config.ISOs[idx].ISODownloadPVE {
 			preSteps = append(preSteps,
@@ -106,13 +130,16 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 
 	steps := append(preSteps, coreSteps...)
 	steps = append(steps, b.postSteps...)
+
 	// Run the steps
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
 	b.runner.Run(ctx, state)
+
 	// If there was an error, return that
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
+
 	// If we were interrupted or cancelled, then just exit.
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
 		return nil, errors.New("build was cancelled")
