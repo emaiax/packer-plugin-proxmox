@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
@@ -86,7 +85,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 		&stepRemoveCloudInitDrive{},
 		&stepConvertToTemplate{},
 		&stepFinalizeTemplateConfig{},
-		&StepSuccess{},
+		&stepSuccess{},
 	}
 
 	// If coreSteps is not set, use the default coreSteps
