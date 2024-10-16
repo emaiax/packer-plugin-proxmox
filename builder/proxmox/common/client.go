@@ -1,27 +1,40 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
+// TODO: proxmox-lxc couldn't parse the proxmoxURL correctly, revisit later
 package proxmox
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
+	"net/url"
 	"strings"
 
-	"github.com/Telmate/proxmox-api-go/proxmox"
+	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 )
 
-func newProxmoxClient(config Config) (*proxmox.Client, error) {
+func newProxmoxClient(config Config) (*proxmoxapi.Client, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.SkipCertValidation,
 	}
 
-	client, err := proxmox.NewClient(strings.TrimSuffix(config.proxmoxURL.String(), "/"), nil, "", tlsConfig, "", int(config.TaskTimeout.Seconds()))
+	if config.proxmoxURL == nil {
+		parsedUrl, err := url.Parse(config.ProxmoxURLRaw)
+		if err != nil {
+			return nil, fmt.Errorf("proxmox_url is wrong, value is: %s", parsedUrl)
+		}
+
+		config.proxmoxURL = parsedUrl
+		log.Printf("Connecting to Proxmox URL: %s", config.proxmoxURL)
+	}
+
+	client, err := proxmoxapi.NewClient(strings.TrimSuffix(strings.TrimSpace(config.proxmoxURL.String()), "/"), nil, "", tlsConfig, "", int(config.TaskTimeout.Seconds()))
 	if err != nil {
 		return nil, err
 	}
 
-	*proxmox.Debug = config.PackerDebug
+	*proxmoxapi.Debug = config.PackerDebug
 
 	if config.Token != "" {
 		// configure token auth
