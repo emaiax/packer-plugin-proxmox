@@ -14,7 +14,7 @@ import (
 	proxmoxapi "github.com/Telmate/proxmox-api-go/proxmox"
 )
 
-func newProxmoxClient(config Config) (*proxmoxapi.Client, error) {
+func NewProxmoxClient(config Config) (*proxmoxapi.Client, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.SkipCertValidation,
 	}

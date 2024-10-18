@@ -33,7 +33,7 @@ func TestTokenAuth(t *testing.T) {
 		Token:              "ac5293bf-15e2-477f-b04c-a6dfa7a46b80",
 	}
 
-	client, err := newProxmoxClient(config)
+	client, err := NewProxmoxClient(config)
 	require.NoError(t, err)
 
 	ref := proxmox.NewVmRef(110)
@@ -83,7 +83,7 @@ func TestLogin(t *testing.T) {
 		Token:              "",
 	}
 
-	client, err := newProxmoxClient(config)
+	client, err := NewProxmoxClient(config)
 	require.NoError(t, err)
 
 	ref := proxmox.NewVmRef(110)

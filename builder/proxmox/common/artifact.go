@@ -25,6 +25,15 @@ type Artifact struct {
 // Artifact implements packersdk.Artifact
 var _ packersdk.Artifact = &Artifact{}
 
+func NewArtifact(builderID string, templateID int, proxmoxClient *proxmox.Client, stateData map[string]interface{}) *Artifact {
+	return &Artifact{
+		builderID:     builderID,
+		templateID:    templateID,
+		proxmoxClient: proxmoxClient,
+		StateData:     stateData,
+	}
+}
+
 func (a *Artifact) BuilderId() string {
 	return a.builderID
 }

@@ -50,7 +50,7 @@ type Builder struct {
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook, state multistep.StateBag) (packersdk.Artifact, error) {
 	var err error
-	b.proxmoxClient, err = newProxmoxClient(b.config)
+	b.proxmoxClient, err = NewProxmoxClient(b.config)
 	if err != nil {
 		return nil, err
 	}
