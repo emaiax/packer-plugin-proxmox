@@ -99,7 +99,7 @@ type MountPointConfig struct {
 	Replicate    bool                   `mapstructure:"replicate"`
 	ReadOnly     bool                   `mapstructure:"readonly"`
 	Shared       bool                   `mapstructure:"shared"`
-	DiskSizeGB   int                    `mapstructure:"disk_size_gb"`
+	DiskSize     string                 `mapstructure:"disk_size"`
 }
 
 type NetworkInterfacesConfig struct {

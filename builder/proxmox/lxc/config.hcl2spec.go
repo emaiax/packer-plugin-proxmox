@@ -251,7 +251,7 @@ type FlatMountPointConfig struct {
 	Replicate    *bool                  `mapstructure:"replicate" cty:"replicate" hcl:"replicate"`
 	ReadOnly     *bool                  `mapstructure:"readonly" cty:"readonly" hcl:"readonly"`
 	Shared       *bool                  `mapstructure:"shared" cty:"shared" hcl:"shared"`
-	DiskSizeGB   *int                   `mapstructure:"disk_size_gb" cty:"disk_size_gb" hcl:"disk_size_gb"`
+	DiskSize     *string                `mapstructure:"disk_size" cty:"disk_size" hcl:"disk_size"`
 }
 
 // FlatMapstructure returns a new FlatMountPointConfig.
@@ -276,7 +276,7 @@ func (*FlatMountPointConfig) HCL2Spec() map[string]hcldec.Spec {
 		"replicate":     &hcldec.AttrSpec{Name: "replicate", Type: cty.Bool, Required: false},
 		"readonly":      &hcldec.AttrSpec{Name: "readonly", Type: cty.Bool, Required: false},
 		"shared":        &hcldec.AttrSpec{Name: "shared", Type: cty.Bool, Required: false},
-		"disk_size_gb":  &hcldec.AttrSpec{Name: "disk_size_gb", Type: cty.Number, Required: false},
+		"disk_size":     &hcldec.AttrSpec{Name: "disk_size", Type: cty.String, Required: false},
 	}
 	return s
 }
