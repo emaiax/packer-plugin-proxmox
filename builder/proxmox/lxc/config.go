@@ -138,38 +138,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packersdk.MultiError
 	var warnings []string
 
-	// common/client already does this
-	//
-	// proxmoxConnection := c.ProxmoxConnection
-	// packersdk.LogSecretFilter.Set(proxmoxConnection.Password)
-
-	// // Defaults
-	// if proxmoxConnection.ProxmoxURLRaw == "" {
-	// 	proxmoxConnection.ProxmoxURLRaw = os.Getenv("PROXMOX_URL")
-	// }
-	// if proxmoxConnection.Username == "" {
-	// 	proxmoxConnection.Username = os.Getenv("PROXMOX_USERNAME")
-	// }
-	// if proxmoxConnection.Password == "" {
-	// 	proxmoxConnection.Password = os.Getenv("PROXMOX_PASSWORD")
-	// }
-	// if proxmoxConnection.Token == "" {
-	// 	proxmoxConnection.Token = os.Getenv("PROXMOX_TOKEN")
-	// }
-	// if proxmoxConnection.TaskTimeout == 0 {
-	// 	c.ProxmoxConnection.TaskTimeout = 60 * time.Second
-	// }
-	// c.ProxmoxConnection = proxmoxConnection
-
-	// c.ProxmoxConnection.ProxmoxURL, err = url.Parse(strings.TrimSpace(c.ProxmoxConnection.ProxmoxURLRaw))
-	// log.Println("Proxmox URL: ", c.ProxmoxConnection.ProxmoxURL)
-	// if err != nil {
-	// 	errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("could not parse proxmox_url: %s", err))
-	// }
-
-	// if c.ProxmoxConnection.TaskTimeout == 0 {
-	// 	c.ProxmoxConnection.TaskTimeout = 60 * time.Second
-	// }
 
 	// Defaults from https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/{node}/lxc
 	if c.Arch == "" {
