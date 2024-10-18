@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"time"
 
 	proxmoxcommon "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
 	packercommon "github.com/hashicorp/packer-plugin-sdk/common"
@@ -138,6 +139,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
 	var errs *packersdk.MultiError
 	var warnings []string
 
+	// defaults to 1m
+	if c.TaskTimeout == 0 {
+		c.TaskTimeout = 60 * time.Second
+	}
 
 	// Defaults from https://pve.proxmox.com/pve-docs/api-viewer/#/nodes/{node}/lxc
 	if c.Arch == "" {
@@ -210,9 +215,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, []string, error) {
 		errs = packersdk.MultiErrorAppend(errs, errors.New("vm_name must be a valid DNS name"))
 	}
 
-	// if c.RootFS == nil {
-	//   errs = packersdk.MultiErrorAppend(errs, errors.New("rootfs block must be specified"))
-	// }
+	if c.RootFS == nil {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("rootfs block must be specified"))
+	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, warnings, errs
