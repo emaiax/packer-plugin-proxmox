@@ -143,7 +143,9 @@ func (s *stepCreateLxc) Run(ctx context.Context, state multistep.StateBag) multi
 	config.Tty = c.TTY
 	config.Unique = c.Unique
 	config.Unprivileged = c.Unprivileged
-	config.Tags = strings.Join(c.Tags, ",")
+
+	// config.Tags = strings.Join(c.Tags, ",")
+	config.Tags = c.Tags
 
 	log.Printf("CONFIG: %+v", c)
 

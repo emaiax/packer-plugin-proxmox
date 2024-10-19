@@ -13,11 +13,9 @@ import (
 	"regexp"
 	"time"
 
-	proxmoxcommon "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
-	packercommon "github.com/hashicorp/packer-plugin-sdk/common"
+	common "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 
-	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
@@ -25,23 +23,18 @@ import (
 )
 
 type Config struct {
-	proxmoxcommon.Config      `mapstructure:",squash"`
-	packercommon.PackerConfig `mapstructure:",squash"`
+	common.Config `mapstructure:",squash"`
 
-	Comm communicator.Config `mapstructure:",squash"`
-	Ctx  interpolate.Context `mapstructure-to-hcl2:",skip"`
-	// ProxmoxConnection ProxmoxConnectionConfig `mapstructure:",squash"`
+	Ctx interpolate.Context `mapstructure-to-hcl2:",skip"`
 
 	// Required
 	OsTemplate string `mapstructure:"os_template"`
-	VMID       int    `mapstructure:"vm_id"`
 
 	// Optional
 	Arch               string                    `mapstructure:"arch"`
 	BwLimit            int                       `mapstructure:"bw_limit"`
 	CMode              string                    `mapstructure:"cmode"`
 	Console            bool                      `mapstructure:"console"`
-	Cores              int                       `mapstructure:"cores"`
 	CpuLimit           int                       `mapstructure:"cpu_limit"`
 	CpuUnits           int                       `mapstructure:"cpu_units"`
 	Debug              bool                      `mapstructure:"debug"`
@@ -52,14 +45,12 @@ type Config struct {
 	Hostname           string                    `mapstructure:"hostname"`
 	IgnoreUnpackErrors bool                      `mapstructure:"ignore_unpack_errors"`
 	Lock               string                    `mapstructure:"lock"`
-	Memory             int                       `mapstructure:"memory"`
 	MountPoints        []MountPointConfig        `mapstructure:"mount_points"`
 	Nameserver         string                    `mapstructure:"nameserver"`
 	NetworkInterfaces  []NetworkInterfacesConfig `mapstructure:"network_interfaces"`
 	OnBoot             bool                      `mapstructure:"on_boot"`
 	OSType             string                    `mapstructure:"os_type"`
 	UserPassword       string                    `mapstructure:"user_password"`
-	Pool               string                    `mapstructure:"pool"`
 	Protection         bool                      `mapstructure:"protection"`
 	Restore            bool                      `mapstructure:"restore"`
 	RootFS             *MountPointConfig         `mapstructure:"rootfs"`
@@ -69,7 +60,6 @@ type Config struct {
 	Startup            string                    `mapstructure:"startup"`
 	Storage            string                    `mapstructure:"storage"`
 	Swap               int                       `mapstructure:"swap"`
-	Tags               []string                  `mapstructure:"tags"`
 	Template           bool                      `mapstructure:"template"`
 	Timezone           string                    `mapstructure:"timezone"`
 	TTY                int                       `mapstructure:"tty"`
@@ -77,17 +67,6 @@ type Config struct {
 	Unprivileged       bool                      `mapstructure:"unprivileged"`
 	UnusedVolumes      []string                  `mapstructure:"unused_volumes"`
 }
-
-// type ProxmoxConnectionConfig struct {
-// 	ProxmoxURLRaw      string        `mapstructure:"proxmox_url"`
-// 	ProxmoxURL         *url.URL      `mapstructure-to-hcl2:",skip"`
-// 	SkipCertValidation bool          `mapstructure:"insecure_skip_tls_verify"`
-// 	Username           string        `mapstructure:"username"`
-// 	Password           string        `mapstructure:"password"`
-// 	Token              string        `mapstructure:"token"`
-// 	Node               string        `mapstructure:"node"`
-// 	TaskTimeout        time.Duration `mapstructure:"task_timeout"`
-// }
 
 type MountPointConfig struct {
 	StorageId    string                 `mapstructure:"storage_id"`

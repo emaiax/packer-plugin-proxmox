@@ -4,6 +4,7 @@ package proxmoxlxc
 
 import (
 	"github.com/hashicorp/hcl/v2/hcldec"
+	proxmox "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -18,6 +19,16 @@ type FlatConfig struct {
 	PackerOnError             *string                       `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars            map[string]string             `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars       []string                      `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	HTTPDir                   *string                       `mapstructure:"http_directory" cty:"http_directory" hcl:"http_directory"`
+	HTTPContent               map[string]string             `mapstructure:"http_content" cty:"http_content" hcl:"http_content"`
+	HTTPPortMin               *int                          `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
+	HTTPPortMax               *int                          `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
+	HTTPAddress               *string                       `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
+	HTTPInterface             *string                       `mapstructure:"http_interface" undocumented:"true" cty:"http_interface" hcl:"http_interface"`
+	BootGroupInterval         *string                       `mapstructure:"boot_keygroup_interval" cty:"boot_keygroup_interval" hcl:"boot_keygroup_interval"`
+	BootWait                  *string                       `mapstructure:"boot_wait" cty:"boot_wait" hcl:"boot_wait"`
+	BootCommand               []string                      `mapstructure:"boot_command" cty:"boot_command" hcl:"boot_command"`
+	BootKeyInterval           *string                       `mapstructure:"boot_key_interval" cty:"boot_key_interval" hcl:"boot_key_interval"`
 	Type                      *string                       `mapstructure:"communicator" cty:"communicator" hcl:"communicator"`
 	PauseBeforeConnect        *string                       `mapstructure:"pause_before_connecting" cty:"pause_before_connecting" hcl:"pause_before_connecting"`
 	SSHHost                   *string                       `mapstructure:"ssh_host" cty:"ssh_host" hcl:"ssh_host"`
@@ -73,14 +84,47 @@ type FlatConfig struct {
 	Password                  *string                       `mapstructure:"password" cty:"password" hcl:"password"`
 	Token                     *string                       `mapstructure:"token" cty:"token" hcl:"token"`
 	Node                      *string                       `mapstructure:"node" cty:"node" hcl:"node"`
+	Pool                      *string                       `mapstructure:"pool" cty:"pool" hcl:"pool"`
 	TaskTimeout               *string                       `mapstructure:"task_timeout" cty:"task_timeout" hcl:"task_timeout"`
-	OsTemplate                *string                       `mapstructure:"os_template" cty:"os_template" hcl:"os_template"`
+	VMName                    *string                       `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
 	VMID                      *int                          `mapstructure:"vm_id" cty:"vm_id" hcl:"vm_id"`
+	Tags                      *string                       `mapstructure:"tags" cty:"tags" hcl:"tags"`
+	Boot                      *string                       `mapstructure:"boot" cty:"boot" hcl:"boot"`
+	Memory                    *int                          `mapstructure:"memory" cty:"memory" hcl:"memory"`
+	BalloonMinimum            *int                          `mapstructure:"ballooning_minimum" cty:"ballooning_minimum" hcl:"ballooning_minimum"`
+	Cores                     *int                          `mapstructure:"cores" cty:"cores" hcl:"cores"`
+	CPUType                   *string                       `mapstructure:"cpu_type" cty:"cpu_type" hcl:"cpu_type"`
+	Sockets                   *int                          `mapstructure:"sockets" cty:"sockets" hcl:"sockets"`
+	Numa                      *bool                         `mapstructure:"numa" cty:"numa" hcl:"numa"`
+	OS                        *string                       `mapstructure:"os" cty:"os" hcl:"os"`
+	BIOS                      *string                       `mapstructure:"bios" cty:"bios" hcl:"bios"`
+	EFIConfig                 *proxmox.FlatefiConfig        `mapstructure:"efi_config" cty:"efi_config" hcl:"efi_config"`
+	EFIDisk                   *string                       `mapstructure:"efidisk" cty:"efidisk" hcl:"efidisk"`
+	Machine                   *string                       `mapstructure:"machine" cty:"machine" hcl:"machine"`
+	Rng0                      *proxmox.Flatrng0Config       `mapstructure:"rng0" cty:"rng0" hcl:"rng0"`
+	TPMConfig                 *proxmox.FlattpmConfig        `mapstructure:"tpm_config" cty:"tpm_config" hcl:"tpm_config"`
+	VGA                       *proxmox.FlatvgaConfig        `mapstructure:"vga" cty:"vga" hcl:"vga"`
+	NICs                      []proxmox.FlatNICConfig       `mapstructure:"network_adapters" cty:"network_adapters" hcl:"network_adapters"`
+	Disks                     []proxmox.FlatdiskConfig      `mapstructure:"disks" cty:"disks" hcl:"disks"`
+	PCIDevices                []proxmox.FlatpciDeviceConfig `mapstructure:"pci_devices" cty:"pci_devices" hcl:"pci_devices"`
+	Serials                   []string                      `mapstructure:"serials" cty:"serials" hcl:"serials"`
+	Agent                     *bool                         `mapstructure:"qemu_agent" cty:"qemu_agent" hcl:"qemu_agent"`
+	SCSIController            *string                       `mapstructure:"scsi_controller" cty:"scsi_controller" hcl:"scsi_controller"`
+	Onboot                    *bool                         `mapstructure:"onboot" cty:"onboot" hcl:"onboot"`
+	DisableKVM                *bool                         `mapstructure:"disable_kvm" cty:"disable_kvm" hcl:"disable_kvm"`
+	TemplateName              *string                       `mapstructure:"template_name" cty:"template_name" hcl:"template_name"`
+	TemplateDescription       *string                       `mapstructure:"template_description" cty:"template_description" hcl:"template_description"`
+	CloudInit                 *bool                         `mapstructure:"cloud_init" cty:"cloud_init" hcl:"cloud_init"`
+	CloudInitStoragePool      *string                       `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
+	CloudInitDiskType         *string                       `mapstructure:"cloud_init_disk_type" cty:"cloud_init_disk_type" hcl:"cloud_init_disk_type"`
+	ISOs                      []proxmox.FlatISOsConfig      `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
+	VMInterface               *string                       `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
+	AdditionalArgs            *string                       `mapstructure:"qemu_additional_args" cty:"qemu_additional_args" hcl:"qemu_additional_args"`
+	OsTemplate                *string                       `mapstructure:"os_template" cty:"os_template" hcl:"os_template"`
 	Arch                      *string                       `mapstructure:"arch" cty:"arch" hcl:"arch"`
 	BwLimit                   *int                          `mapstructure:"bw_limit" cty:"bw_limit" hcl:"bw_limit"`
 	CMode                     *string                       `mapstructure:"cmode" cty:"cmode" hcl:"cmode"`
 	Console                   *bool                         `mapstructure:"console" cty:"console" hcl:"console"`
-	Cores                     *int                          `mapstructure:"cores" cty:"cores" hcl:"cores"`
 	CpuLimit                  *int                          `mapstructure:"cpu_limit" cty:"cpu_limit" hcl:"cpu_limit"`
 	CpuUnits                  *int                          `mapstructure:"cpu_units" cty:"cpu_units" hcl:"cpu_units"`
 	Debug                     *bool                         `mapstructure:"debug" cty:"debug" hcl:"debug"`
@@ -91,14 +135,12 @@ type FlatConfig struct {
 	Hostname                  *string                       `mapstructure:"hostname" cty:"hostname" hcl:"hostname"`
 	IgnoreUnpackErrors        *bool                         `mapstructure:"ignore_unpack_errors" cty:"ignore_unpack_errors" hcl:"ignore_unpack_errors"`
 	Lock                      *string                       `mapstructure:"lock" cty:"lock" hcl:"lock"`
-	Memory                    *int                          `mapstructure:"memory" cty:"memory" hcl:"memory"`
 	MountPoints               []FlatMountPointConfig        `mapstructure:"mount_points" cty:"mount_points" hcl:"mount_points"`
 	Nameserver                *string                       `mapstructure:"nameserver" cty:"nameserver" hcl:"nameserver"`
 	NetworkInterfaces         []FlatNetworkInterfacesConfig `mapstructure:"network_interfaces" cty:"network_interfaces" hcl:"network_interfaces"`
 	OnBoot                    *bool                         `mapstructure:"on_boot" cty:"on_boot" hcl:"on_boot"`
 	OSType                    *string                       `mapstructure:"os_type" cty:"os_type" hcl:"os_type"`
 	UserPassword              *string                       `mapstructure:"user_password" cty:"user_password" hcl:"user_password"`
-	Pool                      *string                       `mapstructure:"pool" cty:"pool" hcl:"pool"`
 	Protection                *bool                         `mapstructure:"protection" cty:"protection" hcl:"protection"`
 	Restore                   *bool                         `mapstructure:"restore" cty:"restore" hcl:"restore"`
 	RootFS                    *FlatMountPointConfig         `mapstructure:"rootfs" cty:"rootfs" hcl:"rootfs"`
@@ -108,7 +150,6 @@ type FlatConfig struct {
 	Startup                   *string                       `mapstructure:"startup" cty:"startup" hcl:"startup"`
 	Storage                   *string                       `mapstructure:"storage" cty:"storage" hcl:"storage"`
 	Swap                      *int                          `mapstructure:"swap" cty:"swap" hcl:"swap"`
-	Tags                      []string                      `mapstructure:"tags" cty:"tags" hcl:"tags"`
 	Template                  *bool                         `mapstructure:"template" cty:"template" hcl:"template"`
 	Timezone                  *string                       `mapstructure:"timezone" cty:"timezone" hcl:"timezone"`
 	TTY                       *int                          `mapstructure:"tty" cty:"tty" hcl:"tty"`
@@ -137,6 +178,16 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_on_error":              &hcldec.AttrSpec{Name: "packer_on_error", Type: cty.String, Required: false},
 		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
+		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
+		"http_content":                 &hcldec.AttrSpec{Name: "http_content", Type: cty.Map(cty.String), Required: false},
+		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
+		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
+		"http_bind_address":            &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
+		"http_interface":               &hcldec.AttrSpec{Name: "http_interface", Type: cty.String, Required: false},
+		"boot_keygroup_interval":       &hcldec.AttrSpec{Name: "boot_keygroup_interval", Type: cty.String, Required: false},
+		"boot_wait":                    &hcldec.AttrSpec{Name: "boot_wait", Type: cty.String, Required: false},
+		"boot_command":                 &hcldec.AttrSpec{Name: "boot_command", Type: cty.List(cty.String), Required: false},
+		"boot_key_interval":            &hcldec.AttrSpec{Name: "boot_key_interval", Type: cty.String, Required: false},
 		"communicator":                 &hcldec.AttrSpec{Name: "communicator", Type: cty.String, Required: false},
 		"pause_before_connecting":      &hcldec.AttrSpec{Name: "pause_before_connecting", Type: cty.String, Required: false},
 		"ssh_host":                     &hcldec.AttrSpec{Name: "ssh_host", Type: cty.String, Required: false},
@@ -192,14 +243,47 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"password":                     &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
 		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"node":                         &hcldec.AttrSpec{Name: "node", Type: cty.String, Required: false},
+		"pool":                         &hcldec.AttrSpec{Name: "pool", Type: cty.String, Required: false},
 		"task_timeout":                 &hcldec.AttrSpec{Name: "task_timeout", Type: cty.String, Required: false},
-		"os_template":                  &hcldec.AttrSpec{Name: "os_template", Type: cty.String, Required: false},
+		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"vm_id":                        &hcldec.AttrSpec{Name: "vm_id", Type: cty.Number, Required: false},
+		"tags":                         &hcldec.AttrSpec{Name: "tags", Type: cty.String, Required: false},
+		"boot":                         &hcldec.AttrSpec{Name: "boot", Type: cty.String, Required: false},
+		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
+		"ballooning_minimum":           &hcldec.AttrSpec{Name: "ballooning_minimum", Type: cty.Number, Required: false},
+		"cores":                        &hcldec.AttrSpec{Name: "cores", Type: cty.Number, Required: false},
+		"cpu_type":                     &hcldec.AttrSpec{Name: "cpu_type", Type: cty.String, Required: false},
+		"sockets":                      &hcldec.AttrSpec{Name: "sockets", Type: cty.Number, Required: false},
+		"numa":                         &hcldec.AttrSpec{Name: "numa", Type: cty.Bool, Required: false},
+		"os":                           &hcldec.AttrSpec{Name: "os", Type: cty.String, Required: false},
+		"bios":                         &hcldec.AttrSpec{Name: "bios", Type: cty.String, Required: false},
+		"efi_config":                   &hcldec.BlockSpec{TypeName: "efi_config", Nested: hcldec.ObjectSpec((*proxmox.FlatefiConfig)(nil).HCL2Spec())},
+		"efidisk":                      &hcldec.AttrSpec{Name: "efidisk", Type: cty.String, Required: false},
+		"machine":                      &hcldec.AttrSpec{Name: "machine", Type: cty.String, Required: false},
+		"rng0":                         &hcldec.BlockSpec{TypeName: "rng0", Nested: hcldec.ObjectSpec((*proxmox.Flatrng0Config)(nil).HCL2Spec())},
+		"tpm_config":                   &hcldec.BlockSpec{TypeName: "tpm_config", Nested: hcldec.ObjectSpec((*proxmox.FlattpmConfig)(nil).HCL2Spec())},
+		"vga":                          &hcldec.BlockSpec{TypeName: "vga", Nested: hcldec.ObjectSpec((*proxmox.FlatvgaConfig)(nil).HCL2Spec())},
+		"network_adapters":             &hcldec.BlockListSpec{TypeName: "network_adapters", Nested: hcldec.ObjectSpec((*proxmox.FlatNICConfig)(nil).HCL2Spec())},
+		"disks":                        &hcldec.BlockListSpec{TypeName: "disks", Nested: hcldec.ObjectSpec((*proxmox.FlatdiskConfig)(nil).HCL2Spec())},
+		"pci_devices":                  &hcldec.BlockListSpec{TypeName: "pci_devices", Nested: hcldec.ObjectSpec((*proxmox.FlatpciDeviceConfig)(nil).HCL2Spec())},
+		"serials":                      &hcldec.AttrSpec{Name: "serials", Type: cty.List(cty.String), Required: false},
+		"qemu_agent":                   &hcldec.AttrSpec{Name: "qemu_agent", Type: cty.Bool, Required: false},
+		"scsi_controller":              &hcldec.AttrSpec{Name: "scsi_controller", Type: cty.String, Required: false},
+		"onboot":                       &hcldec.AttrSpec{Name: "onboot", Type: cty.Bool, Required: false},
+		"disable_kvm":                  &hcldec.AttrSpec{Name: "disable_kvm", Type: cty.Bool, Required: false},
+		"template_name":                &hcldec.AttrSpec{Name: "template_name", Type: cty.String, Required: false},
+		"template_description":         &hcldec.AttrSpec{Name: "template_description", Type: cty.String, Required: false},
+		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
+		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
+		"cloud_init_disk_type":         &hcldec.AttrSpec{Name: "cloud_init_disk_type", Type: cty.String, Required: false},
+		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*proxmox.FlatISOsConfig)(nil).HCL2Spec())},
+		"vm_interface":                 &hcldec.AttrSpec{Name: "vm_interface", Type: cty.String, Required: false},
+		"qemu_additional_args":         &hcldec.AttrSpec{Name: "qemu_additional_args", Type: cty.String, Required: false},
+		"os_template":                  &hcldec.AttrSpec{Name: "os_template", Type: cty.String, Required: false},
 		"arch":                         &hcldec.AttrSpec{Name: "arch", Type: cty.String, Required: false},
 		"bw_limit":                     &hcldec.AttrSpec{Name: "bw_limit", Type: cty.Number, Required: false},
 		"cmode":                        &hcldec.AttrSpec{Name: "cmode", Type: cty.String, Required: false},
 		"console":                      &hcldec.AttrSpec{Name: "console", Type: cty.Bool, Required: false},
-		"cores":                        &hcldec.AttrSpec{Name: "cores", Type: cty.Number, Required: false},
 		"cpu_limit":                    &hcldec.AttrSpec{Name: "cpu_limit", Type: cty.Number, Required: false},
 		"cpu_units":                    &hcldec.AttrSpec{Name: "cpu_units", Type: cty.Number, Required: false},
 		"debug":                        &hcldec.AttrSpec{Name: "debug", Type: cty.Bool, Required: false},
@@ -210,14 +294,12 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"hostname":                     &hcldec.AttrSpec{Name: "hostname", Type: cty.String, Required: false},
 		"ignore_unpack_errors":         &hcldec.AttrSpec{Name: "ignore_unpack_errors", Type: cty.Bool, Required: false},
 		"lock":                         &hcldec.AttrSpec{Name: "lock", Type: cty.String, Required: false},
-		"memory":                       &hcldec.AttrSpec{Name: "memory", Type: cty.Number, Required: false},
 		"mount_points":                 &hcldec.BlockListSpec{TypeName: "mount_points", Nested: hcldec.ObjectSpec((*FlatMountPointConfig)(nil).HCL2Spec())},
 		"nameserver":                   &hcldec.AttrSpec{Name: "nameserver", Type: cty.String, Required: false},
 		"network_interfaces":           &hcldec.BlockListSpec{TypeName: "network_interfaces", Nested: hcldec.ObjectSpec((*FlatNetworkInterfacesConfig)(nil).HCL2Spec())},
 		"on_boot":                      &hcldec.AttrSpec{Name: "on_boot", Type: cty.Bool, Required: false},
 		"os_type":                      &hcldec.AttrSpec{Name: "os_type", Type: cty.String, Required: false},
 		"user_password":                &hcldec.AttrSpec{Name: "user_password", Type: cty.String, Required: false},
-		"pool":                         &hcldec.AttrSpec{Name: "pool", Type: cty.String, Required: false},
 		"protection":                   &hcldec.AttrSpec{Name: "protection", Type: cty.Bool, Required: false},
 		"restore":                      &hcldec.AttrSpec{Name: "restore", Type: cty.Bool, Required: false},
 		"rootfs":                       &hcldec.BlockSpec{TypeName: "rootfs", Nested: hcldec.ObjectSpec((*FlatMountPointConfig)(nil).HCL2Spec())},
@@ -227,7 +309,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"startup":                      &hcldec.AttrSpec{Name: "startup", Type: cty.String, Required: false},
 		"storage":                      &hcldec.AttrSpec{Name: "storage", Type: cty.String, Required: false},
 		"swap":                         &hcldec.AttrSpec{Name: "swap", Type: cty.Number, Required: false},
-		"tags":                         &hcldec.AttrSpec{Name: "tags", Type: cty.List(cty.String), Required: false},
 		"template":                     &hcldec.AttrSpec{Name: "template", Type: cty.Bool, Required: false},
 		"timezone":                     &hcldec.AttrSpec{Name: "timezone", Type: cty.String, Required: false},
 		"tty":                          &hcldec.AttrSpec{Name: "tty", Type: cty.Number, Required: false},
