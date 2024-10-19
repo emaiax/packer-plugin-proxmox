@@ -66,6 +66,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			SSHConfig: (*hostComm).SSHConfigFunc(),
 		},
 		&stepGetContainerIpAddr{},
+		&stepProvision{},
 	}
 	b.preSteps = []multistep.Step{}
 	b.postSteps = []multistep.Step{}
