@@ -56,7 +56,17 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	state.Put("hook", hook)
 	state.Put("ui", ui)
 
-	b.coreSteps = []multistep.Step{&stepCreateLxc{}}
+	hostComm := &b.config.Comm
+
+	b.coreSteps = []multistep.Step{
+		&stepCreateLxc{},
+		&communicator.StepConnect{
+			Config:    hostComm,
+			Host:      commHost(hostComm.Host()),
+			SSHConfig: (*hostComm).SSHConfigFunc(),
+		},
+		&stepGetContainerIpAddr{},
+	}
 	b.preSteps = []multistep.Step{}
 	b.postSteps = []multistep.Step{}
 
@@ -68,9 +78,6 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	state.Put("template_id", 983724)
 	// sb := proxmoxcommon.NewCustomSharedBuilder(BuilderID, b.config.Config, coreSteps, preSteps, postSteps, &ProxmoxVMCreator{})
 	// return sb.Run(ctx, ui, hook, state)
-
-	// TODO
-	// hostComm := &b.config.Comm
 
 	// Run the steps
 	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
@@ -108,3 +115,14 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 // 	client := state.Get("proxmoxClient").(*proxmox.Client)
 // 	return config.CreateLxc(vmRef, client)
 // }
+
+// Returns ssh_host or winrm_host (see communicator.Config.Host) config
+// parameter when set, otherwise gets the host IP from running VM
+func commHost(host string) func(state multistep.StateBag) (string, error) {
+	return func(state multistep.StateBag) (string, error) {
+		if host == "" {
+			return "", errors.New("no host set")
+		}
+		return host, nil
+	}
+}

@@ -209,6 +209,7 @@ func (s *stepCreateLxc) Run(ctx context.Context, state multistep.StateBag) multi
 
 		err := config.CreateLxc(vmRef, client)
 		if err == nil {
+			state.Put("vmRef", vmRef)
 			break
 		}
 
