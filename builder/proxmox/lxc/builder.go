@@ -69,6 +69,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&stepGetContainerIpAddr{},
 		&stepProvision{},
 		&commonsteps.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		},
+		&common.StepConvertToTemplate{},
+		&common.StepSuccess{},
 	}
 	b.preSteps = []multistep.Step{}
 	b.postSteps = []multistep.Step{}
