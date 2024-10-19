@@ -179,8 +179,7 @@ func (s *stepCreateLxc) Run(ctx context.Context, state multistep.StateBag) multi
 				ui.Say(fmt.Sprintf("found existing VM template with ID %d on PVE node %s, deleting it", vmRef.VmId(), vmRef.Node()))
 				_, err = client.StopVm(vmRef)
 				if err != nil {
-					ui.Message(fmt.Sprintf("cannot stop VM: %s", err.Error()))
-					// return multistep.ActionHalt
+					ui.Message(fmt.Sprintf("no need to stop the lxc: %s", err.Error()))
 				}
 				_, err = client.DeleteVm(vmRef)
 				if err != nil {
@@ -227,7 +226,6 @@ func (s *stepCreateLxc) Run(ctx context.Context, state multistep.StateBag) multi
 	}
 
 	// // Store the vm id for later
-	// state.Put("vmRef", vmRef)
 	// state.Put("createTemplate", config.Template)
 
 	// log.Printf("config = %v", c)

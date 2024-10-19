@@ -81,8 +81,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	steps = append(b.preSteps, steps...)
 	steps = append(steps, b.postSteps...)
 
+	// TODO: remove after converting container to template
 	// placeholder to successfully run the builder
 	state.Put("template_id", 983724)
+
 	// sb := proxmoxcommon.NewCustomSharedBuilder(BuilderID, b.config.Config, coreSteps, preSteps, postSteps, &ProxmoxVMCreator{})
 	// return sb.Run(ctx, ui, hook, state)
 
