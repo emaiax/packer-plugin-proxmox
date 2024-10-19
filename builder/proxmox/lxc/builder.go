@@ -11,6 +11,7 @@ import (
 	"github.com/Telmate/proxmox-api-go/proxmox"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	common "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
+	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -67,6 +68,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&stepGetContainerIpAddr{},
 		&stepProvision{},
+		&commonsteps.StepCleanupTempKeys{
 	}
 	b.preSteps = []multistep.Step{}
 	b.postSteps = []multistep.Step{}
