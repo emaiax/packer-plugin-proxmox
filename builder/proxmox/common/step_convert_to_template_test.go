@@ -86,7 +86,7 @@ func TestConvertToTemplate(t *testing.T) {
 			state.Put("vmRef", proxmox.NewVmRef(vmid))
 			state.Put("proxmoxClient", converter)
 
-			step := stepConvertToTemplate{}
+			step := StepConvertToTemplate{}
 			action := step.Run(context.TODO(), state)
 			if action != c.expectedAction {
 				t.Errorf("Expected action to be %v, got %v", c.expectedAction, action)

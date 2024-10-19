@@ -83,9 +83,9 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook,
 			Comm: &b.config.Comm,
 		},
 		&stepRemoveCloudInitDrive{},
-		&stepConvertToTemplate{},
+		&StepConvertToTemplate{},
 		&stepFinalizeTemplateConfig{},
-		&stepSuccess{},
+		&StepSuccess{},
 	}
 
 	// If coreSteps is not set, use the default coreSteps

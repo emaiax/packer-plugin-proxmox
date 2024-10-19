@@ -17,7 +17,7 @@ import (
 // converts it into a Proxmox template.
 //
 // It sets the template_id state which is used for Artifact lookup.
-type stepConvertToTemplate struct{}
+type StepConvertToTemplate struct{}
 
 type templateConverter interface {
 	ShutdownVm(*proxmox.VmRef) (string, error)
@@ -26,7 +26,7 @@ type templateConverter interface {
 
 var _ templateConverter = &proxmox.Client{}
 
-func (s *stepConvertToTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepConvertToTemplate) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
 	client := state.Get("proxmoxClient").(templateConverter)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
@@ -54,4 +54,4 @@ func (s *stepConvertToTemplate) Run(ctx context.Context, state multistep.StateBa
 	return multistep.ActionContinue
 }
 
-func (s *stepConvertToTemplate) Cleanup(state multistep.StateBag) {}
+func (s *StepConvertToTemplate) Cleanup(state multistep.StateBag) {}
