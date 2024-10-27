@@ -54,8 +54,9 @@ func (s *stepGetContainerIpAddr) Run(ctx context.Context, state multistep.StateB
 		}
 
 		retryCount++
-		ui.Message("IP address not found yet, retrying...")
-		time.Sleep(1 * time.Second)
+		ui.Message(fmt.Sprintf("IP address not found yet, retrying in 5 seconds (%d/%d)", retryCount, maxRetries))
+
+		time.Sleep(5 * time.Second)
 	}
 
 	if ip == "" {
